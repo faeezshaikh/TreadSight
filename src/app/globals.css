@@ -462,3 +462,69 @@ input[type="range"]::-moz-range-thumb {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Terminator HUD Styles ────────────────────────────────────────── */
+.terminator-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(10, 0, 0, 0.95) 0%, rgba(15, 5, 5, 0.9) 100%);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.08), inset 0 0 60px rgba(239, 68, 68, 0.03);
+}
+
+.terminator-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.terminator-scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 0, 0, 0.015) 2px,
+      rgba(255, 0, 0, 0.015) 4px);
+  animation: scanline-scroll 8s linear infinite;
+}
+
+.terminator-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(255, 0, 0, 0.03) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(255, 0, 0, 0.03) 100%);
+}
+
+@keyframes scanline-scroll {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes terminator-blink {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.terminator-blink {
+  animation: terminator-blink 0.8s step-end infinite;
+}

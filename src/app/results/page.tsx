@@ -58,7 +58,6 @@ export default function ResultsPage() {
 
         try {
             const parsed = JSON.parse(storedAnalysis);
-            // Convert date strings back to Date objects
             parsed.wearPrediction.wetTractionDropDate = new Date(parsed.wearPrediction.wetTractionDropDate);
             parsed.wearPrediction.legalMinimumDate = new Date(parsed.wearPrediction.legalMinimumDate);
             parsed.wearPrediction.tireDeadDate = new Date(parsed.wearPrediction.tireDeadDate);
@@ -134,7 +133,7 @@ export default function ResultsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="min-h-screen pb-10"
+            className="min-h-screen"
         >
             {/* ── Ambient Background — Mood Room ── */}
             <div className="ambient-bg">
@@ -150,7 +149,7 @@ export default function ResultsPage() {
 
             {/* Header */}
             <div className="sticky top-0 z-40 backdrop-blur-xl bg-[#0a0a0f]/80 border-b border-white/[0.04]">
-                <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex items-center justify-between">
                     <button
                         onClick={() => router.push('/scan')}
                         className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
@@ -174,109 +173,238 @@ export default function ResultsPage() {
                 </div>
             </div>
 
-            <div className="max-w-lg mx-auto px-4 pt-6 space-y-6">
-                {/* Score + Risk Badge */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="flex items-center justify-between"
-                >
-                    <HealthScore score={state.currentScore} riskLevel={state.currentRisk} />
-                    <RiskBadge riskLevel={state.currentRisk} remainingMonths={totalMonths} />
-                </motion.div>
+            {/* ═══════════════════════════════════════════════════════════
+                RESPONSIVE LAYOUT
+                Mobile: single column, scrollable
+                Desktop (lg+): 3-column grid, everything visible
+               ═══════════════════════════════════════════════════════════ */}
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-6 pb-10">
 
-                {/* Tire Image Viewer */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <TireViewer
-                        imageSrc={imageSrc}
-                        t={state.t}
-                        unevenWear={skipRotations}
-                        riskColor={riskColor}
-                        glowColor={glowColor}
-                        weatherMode={weatherMode}
-                    />
-                </motion.div>
+                {/* ── DESKTOP LAYOUT (lg+) ── */}
+                <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
 
-                {/* Time Travel Slider */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5"
-                >
-                    <TimeTravel
-                        t={state.t}
-                        onTChange={setT}
-                        totalMonths={totalMonths}
-                        currentDate={state.currentDate}
-                        riskLevel={state.currentRisk}
-                        currentDepth={state.currentDepth}
-                        initialDepth={analysis.wearPrediction.currentDepth32nds}
-                        monthlyWearRate={monthlyWearRate}
-                    />
-                </motion.div>
+                    {/* ── LEFT COLUMN: Tire Image + Controls ── */}
+                    <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-20">
+                        {/* Score + Risk Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="flex items-center justify-between"
+                        >
+                            <HealthScore score={state.currentScore} riskLevel={state.currentRisk} />
+                            <RiskBadge riskLevel={state.currentRisk} remainingMonths={totalMonths} />
+                        </motion.div>
 
-                {/* Weather Toggle */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    <WeatherToggle weatherMode={weatherMode} onWeatherChange={setWeatherMode} />
-                </motion.div>
+                        {/* Tire Image Viewer */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <TireViewer
+                                imageSrc={imageSrc}
+                                t={state.t}
+                                unevenWear={skipRotations}
+                                riskColor={riskColor}
+                                glowColor={glowColor}
+                                weatherMode={weatherMode}
+                            />
+                        </motion.div>
 
-                {/* Acceleration Mode */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.45 }}
-                >
-                    <AccelerationMode
-                        skipRotations={skipRotations}
-                        aggressiveDriving={aggressiveDriving}
-                        onToggleSkipRotations={toggleSkipRotations}
-                        onToggleAggressiveDriving={toggleAggressiveDriving}
-                    />
-                </motion.div>
+                        {/* CTA Panel */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.35 }}
+                        >
+                            <CTAPanel riskLevel={state.currentRisk} />
+                        </motion.div>
+                    </div>
 
-                {/* CTA Panel */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                >
-                    <CTAPanel riskLevel={state.currentRisk} />
-                </motion.div>
+                    {/* ── CENTER COLUMN: Slider + Toggles ── */}
+                    <div className="lg:col-span-3 space-y-5">
+                        {/* Time Travel Slider */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5"
+                        >
+                            <TimeTravel
+                                t={state.t}
+                                onTChange={setT}
+                                totalMonths={totalMonths}
+                                currentDate={state.currentDate}
+                                riskLevel={state.currentRisk}
+                                currentDepth={state.currentDepth}
+                                initialDepth={analysis.wearPrediction.currentDepth32nds}
+                                monthlyWearRate={monthlyWearRate}
+                            />
+                        </motion.div>
 
-                {/* AI Explanation */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.55 }}
-                >
-                    <ExplanationCard explanation={explanation} loading={explanationLoading} />
-                </motion.div>
+                        {/* Weather Toggle */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <WeatherToggle weatherMode={weatherMode} onWeatherChange={setWeatherMode} />
+                        </motion.div>
 
-                {/* Confidence Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                >
-                    <ConfidenceSection
-                        confidence={analysis.treadEstimate.confidence}
-                        bucket={analysis.treadEstimate.bucket}
-                        confidenceBand={analysis.wearPrediction.confidenceBand}
-                    />
-                </motion.div>
+                        {/* Acceleration Mode */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.45 }}
+                        >
+                            <AccelerationMode
+                                skipRotations={skipRotations}
+                                aggressiveDriving={aggressiveDriving}
+                                onToggleSkipRotations={toggleSkipRotations}
+                                onToggleAggressiveDriving={toggleAggressiveDriving}
+                            />
+                        </motion.div>
 
-                {/* Footer */}
-                <div className="text-center py-4">
+                        {/* Confidence Section */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            <ConfidenceSection
+                                confidence={analysis.treadEstimate.confidence}
+                                bucket={analysis.treadEstimate.bucket}
+                                confidenceBand={analysis.wearPrediction.confidenceBand}
+                            />
+                        </motion.div>
+                    </div>
+
+                    {/* ── RIGHT COLUMN: AI Analysis ── */}
+                    <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
+                        {/* AI Explanation — Terminator HUD */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.55 }}
+                        >
+                            <ExplanationCard explanation={explanation} loading={explanationLoading} />
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* ── MOBILE LAYOUT (< lg) ── */}
+                <div className="lg:hidden max-w-lg mx-auto space-y-6">
+                    {/* Score + Risk Badge */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex items-center justify-between"
+                    >
+                        <HealthScore score={state.currentScore} riskLevel={state.currentRisk} />
+                        <RiskBadge riskLevel={state.currentRisk} remainingMonths={totalMonths} />
+                    </motion.div>
+
+                    {/* Tire Image Viewer */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <TireViewer
+                            imageSrc={imageSrc}
+                            t={state.t}
+                            unevenWear={skipRotations}
+                            riskColor={riskColor}
+                            glowColor={glowColor}
+                            weatherMode={weatherMode}
+                        />
+                    </motion.div>
+
+                    {/* Time Travel Slider */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5"
+                    >
+                        <TimeTravel
+                            t={state.t}
+                            onTChange={setT}
+                            totalMonths={totalMonths}
+                            currentDate={state.currentDate}
+                            riskLevel={state.currentRisk}
+                            currentDepth={state.currentDepth}
+                            initialDepth={analysis.wearPrediction.currentDepth32nds}
+                            monthlyWearRate={monthlyWearRate}
+                        />
+                    </motion.div>
+
+                    {/* Weather Toggle */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <WeatherToggle weatherMode={weatherMode} onWeatherChange={setWeatherMode} />
+                    </motion.div>
+
+                    {/* Acceleration Mode */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.45 }}
+                    >
+                        <AccelerationMode
+                            skipRotations={skipRotations}
+                            aggressiveDriving={aggressiveDriving}
+                            onToggleSkipRotations={toggleSkipRotations}
+                            onToggleAggressiveDriving={toggleAggressiveDriving}
+                        />
+                    </motion.div>
+
+                    {/* CTA Panel */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                    >
+                        <CTAPanel riskLevel={state.currentRisk} />
+                    </motion.div>
+
+                    {/* AI Explanation */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.55 }}
+                    >
+                        <ExplanationCard explanation={explanation} loading={explanationLoading} />
+                    </motion.div>
+
+                    {/* Confidence Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                    >
+                        <ConfidenceSection
+                            confidence={analysis.treadEstimate.confidence}
+                            bucket={analysis.treadEstimate.bucket}
+                            confidenceBand={analysis.wearPrediction.confidenceBand}
+                        />
+                    </motion.div>
+
+                    {/* Footer */}
+                    <div className="text-center py-4">
+                        <p className="text-[10px] text-[#555570]">
+                            Estimates only. Not a substitute for professional inspection.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Desktop Footer */}
+                <div className="hidden lg:block text-center py-6 mt-4">
                     <p className="text-[10px] text-[#555570]">
                         Estimates only. Not a substitute for professional inspection.
                     </p>
