@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Share2, Gauge } from 'lucide-react';
@@ -15,6 +15,7 @@ import CTAPanel from '@/components/results/CTAPanel';
 import ConfidenceSection from '@/components/results/ConfidenceSection';
 import ExplanationCard from '@/components/results/ExplanationCard';
 import { useTimeTravelState } from '@/hooks/useTimeTravelState';
+import { getMonthlyWearRate } from '@/lib/wearModel';
 import { RISK_COLORS, RISK_GLOW_COLORS } from '@/lib/constants';
 import type { AnalysisResult, LLMExplanation } from '@/types';
 
@@ -37,6 +38,12 @@ export default function ResultsPage() {
         aggressiveDriving,
         toggleAggressiveDriving,
     } = useTimeTravelState({ analysis });
+
+    // Compute monthly wear rate for TimeTravel threshold calculation
+    const monthlyWearRate = useMemo(() => {
+        if (!analysis) return 0;
+        return getMonthlyWearRate(analysis.wearPrediction.wearRatePer1000Miles, 12000);
+    }, [analysis]);
 
     // Load analysis from sessionStorage
     useEffect(() => {
@@ -100,6 +107,28 @@ export default function ResultsPage() {
     const riskColor = RISK_COLORS[state.currentRisk];
     const glowColor = RISK_GLOW_COLORS[state.currentRisk];
 
+    // Ambient background color based on risk
+    const ambientColors: Record<string, { orb1: string; orb2: string }> = {
+        'Safe': {
+            orb1: 'rgba(16, 185, 129, 0.06)',
+            orb2: 'rgba(0, 212, 255, 0.04)',
+        },
+        'Monitor': {
+            orb1: 'rgba(245, 158, 11, 0.06)',
+            orb2: 'rgba(251, 191, 36, 0.04)',
+        },
+        'Plan Soon': {
+            orb1: 'rgba(249, 115, 22, 0.08)',
+            orb2: 'rgba(245, 158, 11, 0.05)',
+        },
+        'Replace Now': {
+            orb1: 'rgba(239, 68, 68, 0.08)',
+            orb2: 'rgba(249, 115, 22, 0.05)',
+        },
+    };
+
+    const ambient = ambientColors[state.currentRisk] || ambientColors['Safe'];
+
     return (
         <motion.main
             initial={{ opacity: 0 }}
@@ -107,6 +136,18 @@ export default function ResultsPage() {
             transition={{ duration: 0.4 }}
             className="min-h-screen pb-10"
         >
+            {/* ── Ambient Background — Mood Room ── */}
+            <div className="ambient-bg">
+                <div
+                    className="ambient-orb ambient-orb-1"
+                    style={{ background: ambient.orb1, transition: 'background 1.5s ease' }}
+                />
+                <div
+                    className="ambient-orb ambient-orb-2"
+                    style={{ background: ambient.orb2, transition: 'background 1.5s ease' }}
+                />
+            </div>
+
             {/* Header */}
             <div className="sticky top-0 z-40 backdrop-blur-xl bg-[#0a0a0f]/80 border-b border-white/[0.04]">
                 <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
@@ -175,6 +216,8 @@ export default function ResultsPage() {
                         currentDate={state.currentDate}
                         riskLevel={state.currentRisk}
                         currentDepth={state.currentDepth}
+                        initialDepth={analysis.wearPrediction.currentDepth32nds}
+                        monthlyWearRate={monthlyWearRate}
                     />
                 </motion.div>
 

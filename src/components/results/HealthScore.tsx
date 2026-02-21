@@ -44,28 +44,61 @@ export default function HealthScore({ score, riskLevel, animated = true }: Healt
     // SVG ring parameters
     const size = 160;
     const strokeWidth = 8;
+    const tickStrokeWidth = 1;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     const percent = displayScore / 100;
     const offset = circumference * (1 - percent);
 
+    // Decorative tick marks
+    const tickCount = 40;
+    const tickRadius = radius + 6;
+
+    // Determine if score is in danger zone for pulse
+    const shouldPulse = displayScore < 35;
+
     return (
         <div className="flex flex-col items-center">
-            <div className="relative" style={{ width: size, height: size }}>
-                <svg width={size} height={size} className="-rotate-90">
+            <div className="relative" style={{ width: size + 16, height: size + 16 }}>
+                <svg width={size + 16} height={size + 16} className="-rotate-90">
+                    {/* Decorative tick marks */}
+                    {Array.from({ length: tickCount }).map((_, i) => {
+                        const angle = (i / tickCount) * Math.PI * 2;
+                        const x1 = (size + 16) / 2 + Math.cos(angle) * (tickRadius - 3);
+                        const y1 = (size + 16) / 2 + Math.sin(angle) * (tickRadius - 3);
+                        const x2 = (size + 16) / 2 + Math.cos(angle) * (tickRadius + 1);
+                        const y2 = (size + 16) / 2 + Math.sin(angle) * (tickRadius + 1);
+                        const isActive = i / tickCount <= percent;
+                        return (
+                            <line
+                                key={i}
+                                x1={x1}
+                                y1={y1}
+                                x2={x2}
+                                y2={y2}
+                                stroke={isActive ? `${color}60` : 'rgba(255,255,255,0.06)'}
+                                strokeWidth={tickStrokeWidth}
+                                style={{
+                                    transition: 'stroke 0.4s ease',
+                                }}
+                            />
+                        );
+                    })}
+
                     {/* Background ring */}
                     <circle
-                        cx={size / 2}
-                        cy={size / 2}
+                        cx={(size + 16) / 2}
+                        cy={(size + 16) / 2}
                         r={radius}
                         fill="none"
                         stroke="rgba(255,255,255,0.05)"
                         strokeWidth={strokeWidth}
                     />
-                    {/* Score ring */}
+
+                    {/* Score ring with glow trail */}
                     <motion.circle
-                        cx={size / 2}
-                        cy={size / 2}
+                        cx={(size + 16) / 2}
+                        cy={(size + 16) / 2}
                         r={radius}
                         fill="none"
                         stroke={color}
@@ -73,8 +106,27 @@ export default function HealthScore({ score, riskLevel, animated = true }: Healt
                         strokeLinecap="round"
                         strokeDasharray={circumference}
                         strokeDashoffset={offset}
+                        className={shouldPulse ? 'animate-ring-pulse' : ''}
                         style={{
-                            filter: `drop-shadow(0 0 8px ${color}60)`,
+                            filter: `drop-shadow(0 0 10px ${color}80) drop-shadow(0 0 20px ${color}40)`,
+                            transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease',
+                        }}
+                    />
+
+                    {/* Glow trail — secondary ring */}
+                    <circle
+                        cx={(size + 16) / 2}
+                        cy={(size + 16) / 2}
+                        r={radius}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={strokeWidth + 6}
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        opacity={0.1}
+                        style={{
+                            filter: `blur(4px)`,
                             transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease',
                         }}
                     />
@@ -82,18 +134,24 @@ export default function HealthScore({ score, riskLevel, animated = true }: Healt
 
                 {/* Center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span
+                    <motion.span
                         className="text-4xl font-extrabold font-mono tabular-nums"
                         style={{ color }}
+                        animate={{
+                            textShadow: shouldPulse
+                                ? [`0 0 20px ${color}60`, `0 0 10px ${color}30`]
+                                : `0 0 10px ${color}30`,
+                        }}
+                        transition={{ duration: 1.5, repeat: shouldPulse ? Infinity : 0, repeatType: 'reverse' }}
                     >
                         {displayScore}
-                    </span>
+                    </motion.span>
                     <span className="text-xs text-[#8888a0] mt-0.5">/ 100</span>
                 </div>
             </div>
 
             {/* Label */}
-            <p className="text-xs text-[#555570] mt-3 uppercase tracking-wider font-medium">
+            <p className="text-xs text-[#555570] mt-2 uppercase tracking-wider font-medium">
                 Health Score
             </p>
         </div>

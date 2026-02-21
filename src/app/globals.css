@@ -17,6 +17,7 @@
   --glow-green: rgba(16, 185, 129, 0.2);
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-accent: rgba(0, 212, 255, 0.2);
+  --ambient-color: rgba(16, 185, 129, 0.08);
 }
 
 * {
@@ -40,15 +41,17 @@ body {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--text-muted);
   border-radius: 3px;
 }
 
-/* ── Custom Slider ─────────────────────────────────────────────────── */
+/* ── Custom Slider — Base ──────────────────────────────────────────── */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -88,16 +91,95 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+/* ── Time Travel Slider — Enhanced ─────────────────────────────────── */
+.time-travel-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+      rgba(16, 185, 129, 0.3) 0%,
+      rgba(245, 158, 11, 0.3) 40%,
+      rgba(249, 115, 22, 0.3) 70%,
+      rgba(239, 68, 68, 0.4) 100%);
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.time-travel-slider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--slider-progress, 0%);
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+      var(--accent-green),
+      var(--accent-yellow),
+      var(--accent-orange),
+      var(--accent-red));
+  pointer-events: none;
+  transition: width 0.05s linear;
+}
+
+.time-travel-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #ffffff, #e0e0e8);
+  border: 3px solid var(--slider-color, var(--accent-cyan));
+  box-shadow:
+    0 0 14px var(--slider-color, rgba(0, 212, 255, 0.4)),
+    0 0 30px var(--slider-color, rgba(0, 212, 255, 0.15)),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.time-travel-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 0 22px var(--slider-color, rgba(0, 212, 255, 0.6)),
+    0 0 44px var(--slider-color, rgba(0, 212, 255, 0.2)),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.time-travel-slider::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+}
+
+.time-travel-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #ffffff, #e0e0e8);
+  border: 3px solid var(--slider-color, var(--accent-cyan));
+  box-shadow:
+    0 0 14px var(--slider-color, rgba(0, 212, 255, 0.4)),
+    0 0 30px var(--slider-color, rgba(0, 212, 255, 0.15));
+  cursor: pointer;
+}
+
 /* ── Glow Effects ──────────────────────────────────────────────────── */
 .glow-green {
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.3), 0 0 60px rgba(16, 185, 129, 0.1);
 }
+
 .glow-yellow {
   box-shadow: 0 0 30px rgba(245, 158, 11, 0.3), 0 0 60px rgba(245, 158, 11, 0.1);
 }
+
 .glow-orange {
   box-shadow: 0 0 30px rgba(249, 115, 22, 0.4), 0 0 60px rgba(249, 115, 22, 0.15);
 }
+
 .glow-red {
   box-shadow: 0 0 30px rgba(239, 68, 68, 0.5), 0 0 60px rgba(239, 68, 68, 0.2);
 }
@@ -119,8 +201,13 @@ input[type="range"]::-moz-range-thumb {
 
 /* ── Animated Gradient Border ──────────────────────────────────────── */
 @keyframes gradient-rotate {
-  0% { --angle: 0deg; }
-  100% { --angle: 360deg; }
+  0% {
+    --angle: 0deg;
+  }
+
+  100% {
+    --angle: 360deg;
+  }
 }
 
 .gradient-border {
@@ -128,6 +215,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 16px;
   overflow: hidden;
 }
+
 .gradient-border::before {
   content: '';
   position: absolute;
@@ -145,49 +233,121 @@ input[type="range"]::-moz-range-thumb {
 .weather-wet {
   position: relative;
 }
+
 .weather-wet::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-    rgba(59, 130, 246, 0.05) 0%,
-    rgba(59, 130, 246, 0.12) 50%,
-    rgba(59, 130, 246, 0.05) 100%
-  );
+      rgba(59, 130, 246, 0.06) 0%,
+      rgba(59, 130, 246, 0.14) 50%,
+      rgba(59, 130, 246, 0.06) 100%);
   pointer-events: none;
   border-radius: inherit;
+  z-index: 2;
+  animation: weather-wet-breathe 3s ease-in-out infinite;
 }
 
 .weather-snow {
   position: relative;
 }
+
 .weather-snow::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-    rgba(200, 220, 255, 0.08) 0%,
-    rgba(200, 220, 255, 0.15) 40%,
-    rgba(180, 200, 255, 0.08) 100%
-  );
+      rgba(200, 220, 255, 0.1) 0%,
+      rgba(200, 220, 255, 0.18) 40%,
+      rgba(180, 200, 255, 0.08) 100%);
   pointer-events: none;
   border-radius: inherit;
+  z-index: 2;
+  animation: weather-snow-shimmer 4s ease-in-out infinite;
 }
 
-/* ── Pulse Animation ───────────────────────────────────────────────── */
+@keyframes weather-wet-breathe {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes weather-snow-shimmer {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Pulse Animations ──────────────────────────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* ── Risk Aura Pulse ──────────────────────────────────────────────── */
+@keyframes risk-pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-risk-pulse {
+  animation: risk-pulse 2s ease-in-out infinite;
+}
+
+/* ── Ring Pulse (Health Score) ─────────────────────────────────────── */
+@keyframes ring-pulse {
+
+  0%,
+  100% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+}
+
+.animate-ring-pulse {
+  animation: ring-pulse 1.8s ease-in-out infinite;
+}
+
 /* ── Risk Aura ─────────────────────────────────────────────────────── */
 .risk-aura {
   position: relative;
 }
+
 .risk-aura::before {
   content: '';
   position: absolute;
@@ -201,16 +361,104 @@ input[type="range"]::-moz-range-thumb {
 
 /* ── Haptic Shake ──────────────────────────────────────────────────── */
 @keyframes haptic-shake {
-  0%, 100% { transform: translateX(0); }
-  10% { transform: translateX(-2px); }
-  20% { transform: translateX(2px); }
-  30% { transform: translateX(-2px); }
-  40% { transform: translateX(2px); }
-  50% { transform: translateX(-1px); }
-  60% { transform: translateX(1px); }
-  70% { transform: translateX(0); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10% {
+    transform: translateX(-3px);
+  }
+
+  20% {
+    transform: translateX(3px);
+  }
+
+  30% {
+    transform: translateX(-3px);
+  }
+
+  40% {
+    transform: translateX(3px);
+  }
+
+  50% {
+    transform: translateX(-2px);
+  }
+
+  60% {
+    transform: translateX(2px);
+  }
+
+  70% {
+    transform: translateX(-1px);
+  }
+
+  80% {
+    transform: translateX(0);
+  }
 }
 
 .haptic-shake {
-  animation: haptic-shake 0.4s ease-in-out;
+  animation: haptic-shake 0.5s ease-in-out;
+}
+
+/* ── Ambient Background ───────────────────────────────────────────── */
+@keyframes ambient-drift {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(10px, -15px) scale(1.05);
+  }
+
+  50% {
+    transform: translate(-5px, 10px) scale(0.98);
+  }
+
+  75% {
+    transform: translate(15px, 5px) scale(1.02);
+  }
+}
+
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: background 1.5s ease;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: ambient-drift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.ambient-orb-1 {
+  width: 600px;
+  height: 600px;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.ambient-orb-2 {
+  width: 400px;
+  height: 400px;
+  top: 60%;
+  left: 30%;
+  animation-delay: -7s;
+}
+
+/* ── Smooth Number Transition ─────────────────────────────────────── */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
